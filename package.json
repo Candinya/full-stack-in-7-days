@@ -1,0 +1,20 @@
+{
+  "name": "full-stack-in-7-days",
+  "repository": "https://github.com/Candinya/full-stack-in-7-days.git",
+  "author": "Nya Candy <dev@candinya.com>",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "sass": "^1.71.0",
+    "viewerjs": "^1.11.6",
+    "vitepress": "1.0.0-rc.43",
+    "vitepress-plugin-comment-with-giscus": "^1.1.12",
+    "vitepress-plugin-image-viewer": "^1.1.3"
+  },
+  "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2"
+  }
+}
