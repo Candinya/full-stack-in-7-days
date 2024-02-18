@@ -8,6 +8,8 @@ export const shared = defineConfig({
     math: true
   },
 
+  base: '/full-stack-in-7-days/',
+
   themeConfig: {
 
     socialLinks: [
