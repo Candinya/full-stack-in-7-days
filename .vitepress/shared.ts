@@ -15,5 +15,9 @@ export const shared = defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Candinya/full-stack-in-7-days' }
     ],
+
+    search: {
+      provider: "local",
+    },
   },
 })
