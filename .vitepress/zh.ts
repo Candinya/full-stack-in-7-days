@@ -12,9 +12,12 @@ export const zh = defineConfig({
       {
         text: '目录',
         collapsed: false,
+        link: '/contents/',
         items: [
+          { text: '序言', link: '/preface/' },
           { text: 'Day 1 - 初探编程', link: '/what-is-programming/' },
-          { text: 'Day 2 - 前端的魅力', link: '/frontend-intro/' }
+          { text: 'Day 2 - 前端的魅力', link: '/frontend-intro/' },
+          { text: 'Day 3 - 我的第一个前端项目', link: '/hello-browser/' },
         ]
       }
     ],
