@@ -227,7 +227,7 @@ go version
 * 以前还使用过 [Sourcetree](https://www.sourcetreeapp.com/) ，但它的响应速度比较缓慢，所以在使用了一段时间之后就没有再继续使用了。
 * GitHub 有一个专门优化的 git GUI 工具 [GitHub Desktop](https://desktop.github.com/) ，以前也稍微用过几次，整体操作上挺流畅的，就是可惜对 GitHub 之外的代码托管平台的支持程度并没有特别好。
 * 我还看到有人使用 [Gitnuro](https://gitnuro.com/) ，但我没有实际体验过，所以先不做评论。
-* 不少 IDE 也会带有自己的 git 管理工具，如果暂时没有想好用什么比较好的话，可以先从这些自带的开始尝试。
+* 不少开发工具也会带有自己的 git 管理工具，如果暂时没有想好用什么比较好的话，可以先从这些自带的开始尝试。
 
 ### 开发工具的选择
 

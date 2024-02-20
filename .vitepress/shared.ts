@@ -5,7 +5,8 @@ export const shared = defineConfig({
   cleanUrls: true,
 
   markdown: {
-    math: true
+    math: true,
+    lineNumbers: true,
   },
 
   base: '/full-stack-in-7-days/',
