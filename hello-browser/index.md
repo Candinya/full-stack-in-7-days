@@ -131,7 +131,7 @@ pnpm create vite
 
 您会得到形如这样的输出：
 
-```log
+```sh
 ../../../.pnpm-store/v3/tmp/dlx-44456    |   +1 +
 ../../../.pnpm-store/v3/tmp/dlx-44456    | Progress: resolved 1, reused 1, downloaded 0, added 1, done
 
@@ -224,6 +224,18 @@ pnpm 提供了一些指令的别名（ alias ），例如 `pnpm i` 就可以起�
 按下红色的 ⏹ 按键，就可以看到运行进程被结束了。
 
 ## 准备工作
+
+### 浏览器插件
+
+React 官方提供了一个可以用于辅助开发工作的插件 [React Developer Tools] ，它可以在各大浏览器的插件商店里找到。
+
+这个插件会在开发者工具里添加 ⚛ Components 和 ⚛ Profiler 两个面板，前者可以用于即时查看各个组件之间的关系和其内部的状态，后者可以用来跟踪页面性能以帮助在发现奇怪性能问题时的调试工作进行。
+
+不过在前期的开发工作中或许并不会非常多地使用到这个插件的功能，也因此如果您觉得没有必要的话可以先不安装，等之后决定要进入 React 开发领域了再补上也完全没问题。
+
+[React Developer Tools]: https://react.dev/learn/react-developer-tools
+
+### 优化
 
 在正式开始写代码之前，我们先来关注一下刚刚提到的两件事：代码美化和目录优化。
 
@@ -677,7 +689,7 @@ PropsWithChildren 又是什么呢？从字面上来看，它指的是一个含�
 
 进入现代前端开发流程的很大一个好处就是不需要自己造轮子，直接找符合自己设计风格的组件库往里面套，能省去非常多折腾基础样式和调整类型适配的工夫。缺点就是组件库里没实现的组件还得自己出手写，要么就是在选设计的时候就多看看组件库，找组件最全的那个。
 
-React 有非常多成熟的组件库，例如经典的 [MUI] （但他们商业化了，味儿挺重），国产的 [Ant Design] （18 年圣诞节彩蛋那个），或是我现在工作上用了不少的 [Mantine] 。
+React 有非常多成熟的组件库，例如经典的 [MUI] （但他们商业化了，味儿挺重），国产的 [Ant Design] （18 年圣诞节彩蛋事故那个），或是我现在工作上用了不少的 [Mantine] 。
 
 [MUI]: https://mui.com/
 [Ant Design]: https://ant.design/
@@ -691,7 +703,162 @@ React 有非常多成熟的组件库，例如经典的 [MUI] （但他们商业�
 
 ### 路由管理
 
+React 本身并不带有路由管理相关的功能，这意味着它并不能用于直接处理一些需要针对不同路径渲染出不同页面的需求。我们有两种解决这个问题的方案：使用一个自带路由管理的整合框架（例如 Next.js ），或是使用一些第三方的路由管理工具（例如 react-router-dom ）。
+
+由于我们这次并没有使用 Next.js ，因此我们以 `react-router-dom` 为例，简单介绍 React 的路由管理。
+
+::: tip 可能过期的知识
+
+因为这个组件也在不断地更新，此处的教程随时都有可能会过时。为了能更准确地理解相关的逻辑并解决可能出现的不兼容问题，推荐您在遇到任何疑惑时及时参考[官方的文档](https://reactrouter.com/)。
+
+:::
+
+首先我们需要安装它。官方文档需要我们额外安装几个其他的组件，我不确认它们是否必要，在我本地的测试里不安装这些组件也能正常工作。
+
+```sh
+pnpm i react-router-dom
+```
+
+之后就可以使用它。参照官方的样例，我们把它放置到 `main.tsx` 文件中。就像这样：
+
+```tsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';  /* [!code ++] */
+
+const router = createBrowserRouter([ /* [!code ++] */
+  {                                  /* [!code ++] */
+    path: "/",                       /* [!code ++] */
+    element: <App />,                /* [!code ++] */
+  },                                 /* [!code ++] */
+]);                                  /* [!code ++] */
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />                            /* [!code --] */
+    <RouterProvider router={router} /> /* [!code ++] */
+  </React.StrictMode>,
+)
+```
+
+::: details 不同类型的 Router
+
+React Router 提供三种不同类型的 Router ： BrowserRouter 、 HashRouter 和 MemoryRouter 。一般来说，前两种较为常用，而第三种至少于我个人而言是没有使用过的。所以这里只简单地讲一下前两者之间的区别。
+
+- BrowserRouter 的意思是使用 HTTP 请求路径进行分页路由，也就是我们最常使用的方案，它美观并且便于管理。通过这种方式打开的网页，在每一个子路径下的请求会被服务器理解成不同的页面。
+  
+  但在使用 Vite 之类会把项目构建成仅有单一 HTML 文件的工具时，这种方式需要对部署服务器进行一些特殊的调整：需要服务器将尝试的文件配置成这个唯一的入口（也就是 index.html ）。路由是在页面加载之后由 React Router 自己来处理的，不能让网页服务器在发现请求的路径不存在于文件系统后直接扔出一个 404 。
+
+- HashRouter 则是会将分页路径放置于浏览器地址栏的 `#` 后，作为一个浏览器加载页面时的本地状态（例如传统意义上对于各级标题的滚动定位），从而避免具体的路径被发送给网页服务器。
+  
+  对于网页服务器来说，它接收到的所有请求都是根目录的 index.html ，因而无需对部署服务器进行特殊配置即可正常使用；但缺陷是这种方案的路径会不美观，且非常不利于爬虫的正常获取数据——在它看来永远都只有一个属于根目录的页面。
+
+如果这么说不好理解的话，我画了一个图：
+
+![两种不同的路由](./attachments/different-routers.png)
+
+如果还是感觉理解不能的话，没关系，我们暂时不会用到这方面的知识，等到具体部署的时候我会再详细展开来讲讲的。
+
+:::
+
+这样配置能让我们在加载 `/` 路径时使用 `App` 这个组件。
+
+要加入新的路径也非常简单。例如，我们希望在访问 `/new-page` 路径时加载一个新的页面，那么我们可以这样写：
+
+```tsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "/new-page",                  /* [!code ++] */
+    element: <div>这是一个船新的页面</div> /* [!code ++] */
+  },                                    /* [!code ++] */
+]);
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>,
+)
+```
+
+当我们在浏览器里手动更改路径为 `/new-page` 时，页面是不是随之变化了呢～
+
+![船新的页面](./attachments/new-page.png)
+
+但对用户来说，手动输入链接是不可接受的。所以让我们来设置一个按钮吧。可以在 `App.tsx` 里这样写：
+
+```tsx
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+import Guess1 from "@/components/Guess1.tsx";
+import { NavLink } from "react-router-dom";     /* [!code ++] */
+
+function App() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <>
+      <div>
+        <a href="https://vitejs.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 2)}>
+          count is {count}
+        </button>
+        <p>
+          好耶！<code>热更新</code>生效了
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+      <Guess1 alertMessage={"坏耶"}>
+        <h2>怪耶</h2>
+      </Guess1>
+      <NavLink to={"/new-page"}>              /* [!code ++] */
+        前往异世界的大门                         /* [!code ++] */
+      </NavLink>                              /* [!code ++] */
+    </>
+  )
+}
+
+export default App
+```
+
+页面上就会出现一行非常朴素的字。当我们点击这行字的时候，我们也就来到新的页面了。
+
+::: tip 猜猜2
+
+如果您打开开发者工具，您会发现这个组件渲染得到的就只是一个指定路径的 a 标签。那么，是否能用一个简单的 a 标签来替代掉这个组件呢？
+
+:::
+
+而如果要将各个页面组件单独拆出来，或是将页面的配置单独拆出来的方案，我想经过上面的学习，您一定已经了解了吧？那这里我也就不多重复啦。
+
+这些还只是 react-router-dom 的简单应用。在一个复杂项目中，通常并不是整个页面都需要更新，只有其中的一块主内容区域是和路径相关的，其他的都属于样式的部分，因而没有必要重复编写和渲染；在一些更为复杂的项目中，甚至会出现嵌套路由，即在主内容区域中又划分有共用的内容和各自路径独立的内容。这些需求，它都能实现，只是具体的配置方法各有不同。在这里由于篇幅限制暂时不展开讲解，如果您有兴趣的话，欢迎随时去官方文档里了解更多。
+
 ### 状态管理
+
+当一个项目庞大到需要存储非常多状态以控制各个模块的内容时，使用一套优秀的状态管理系统就成了一项必备的需求。
 
 ## 优化
 
@@ -703,7 +870,7 @@ React 有非常多成熟的组件库，例如经典的 [MUI] （但他们商业�
 
 今天我们快速地过了一遍 React 相关的知识，我想您应该能稍微对它是什么、能做什么、本身的局限性和对应的扩展补充都有了一定的了解。
 
-猜猜 1 的答案相信您一定能猜对——第一个按钮是有效的，第二个无效。
+猜猜1 的答案相信您一定能猜对——第一个按钮是有效的，第二个无效。
 
 但如果您确实将这个组件写出来测试的话，您会发现在测试环境下，打开页面的时候就弹出了一个弹窗，并且弹出的两次。
 
@@ -714,5 +881,11 @@ React 有非常多成熟的组件库，例如经典的 [MUI] （但他们商业�
 参见 [My initializer or updater function runs twice] ，这是故意为之的行为。 React 在**严格模式**（Strict Mode）的**开发环境**下，会连续调用两次组件初始化来帮助发现可能存在的问题，而在生产环境下不会出现。
 
 [My initializer or updater function runs twice]: https://react.dev/reference/react/useState#my-initializer-or-updater-function-runs-twice
+
+猜猜2 的答案我想您也完全没问题——是有必要使用这个组件的。它虽然渲染得到的只是一个 a 标签，但它与传统意义上用于唤起浏览器路径变换行为的 a 标签不同，它会调用 React Router 的操作，从而在不重新加载页面的情况下实现路径变换与页面组件的更新。
+
+另外，这个组件还有一些特殊的功用，例如可以根据是否为当前页面改变自身的状态，从而辅助实现类似导航栏高亮显示活动页面的效果。
+
+虽然对于我们目前的项目来说可能区别并不是非常大，但我还是建议使用这些内置的组件，以方便在未来项目进一步扩展到出现局部路由区域时的页面状态维护与开发工作的进行。
 
 ## 课后挑战
