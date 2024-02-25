@@ -246,6 +246,12 @@ Vite 初始化的项目自带一套 eslint 的配置可以开箱即用，而我�
 [安装 Prettier]: https://prettier.io/docs/en/install.html
 [配置 Git 钩子]: https://prettier.io/docs/en/install.html#git-hooks
 
+::: tip 代码美化的意义
+
+代码美化不会改变代码的语义，因而它无法解决运行时遇到的问题。如果代码写错了，那么无论再怎么美化都无法解决这个错误。它解决的是代码的可读性问题，即在不同的情况下，可能会由于不同的编辑器或是不同的开发者习惯导致写出来风格不同的代码；此时使用代码美化工具，可以将所有的格式都修正成美化器里规定的格式，进而确保项目的整体风格一致，并尽可能优化在未来再一次打开项目准备进一步开发时的开发体验。
+
+:::
+
 目录优化的意义在于有一个对 src 目录的相对路径可以稳定使用，从而避免项目过大时，目录之间相对路径关系复杂造成迷惑。
 
 为了实现这个目标，我们需要同时让 Vite 和 TypeScript 编译器都听明白我们想做什么。
@@ -353,7 +359,7 @@ pnpm i -D @types/node
 
 再或者，我们让 React 的 LOGO 反向旋转。
 
-我们会发现并没有什么 JS 代码来处理 React 的 LOGO 旋转事件。那么它是怎么实现的呢？这里就要涉及到 CSS 动画了——在昨天的课后挑战中，样例代码就使用到了这部分的技巧。
+我们会发现并没有什么 JS 代码来处理 React 的 LOGO 旋转事件。那么它是怎么实现的呢？这里就要涉及到 CSS 动画了——在昨天的课后挑战中，参考代码就使用到了这部分的技巧。
 
 使用 CSS 动画相比 JS 渲染动画帧来说最大的好处就是使用起来更为方便，这使得它非常适合用于制作一些简单的小动画效果，例如鼠标移动到对象上时出现背景颜色变化，或是稍微放大一点的效果，或是例如 LOGO 旋转这种。 CSS 动画的另外一个好处就是可以利用硬件加速来渲染，这使得它在部分场景下能获得比 JS 动画相对更优的性能，但这并不绝对（可以参见 MDN 文档中的 [CSS 动画与 JavaScript 动画的性能](https://developer.mozilla.org/zh-CN/docs/Web/Performance/CSS_JavaScript_animation_performance) 页）。
 
@@ -525,7 +531,7 @@ import Guess1 from "@/Guess1.tsx";
 
 此时的两个文件分别长这样（使用了第二种导入方式）：
 
-:::code-group
+::: code-group
 
 ```tsx [App.tsx]
 import { useState } from 'react'
@@ -602,7 +608,7 @@ export default Guess1;  /* [!code ++] */
 
 以我的个人习惯，我会这样写：
 
-:::code-group
+::: code-group
 
 ```tsx [App.tsx（部分）] {10-12}
 {/* ... 上略 */}
@@ -697,6 +703,10 @@ React 有非常多成熟的组件库，例如经典的 [MUI] （但他们商业�
 
 因为各家组件库用起来都大同小异，和调用自己写的组件区别不大，更多的还是要去对着各家提供的文档边看边用，所以此处就不多赘述了。
 
+而在一些有设计方案给出，需要自建组件库的场合，我们会倾向于使用 [TailwindCSS] 来构建自定义的组件。
+
+在课后挑战的示例代码中我们会以 Mantine 作为组件库框架，如果您有兴趣的话也可以尝试其他的。
+
 ## 更大的项目
 
 光有一个页面并不能满足我们所有的需求。当项目的规模开始扩张的时候，我们会产生一些超出 React 和组件本身的必要处理。这里简单地讲两个非常常用的内容：路由管理和状态管理。
@@ -709,11 +719,19 @@ React 本身并不带有路由管理相关的功能，这意味着它并不能�
 
 ::: tip 可能过期的知识
 
-因为这个组件也在不断地更新，此处的教程随时都有可能会过时。为了能更准确地理解相关的逻辑并解决可能出现的不兼容问题，推荐您在遇到任何疑惑时及时参考[官方的文档](https://reactrouter.com/)。
+因为这个项目也在不断地更新，此处的教程随时都有可能会过时。为了能更准确地理解相关的逻辑并解决可能出现的不兼容问题，推荐您在遇到任何疑惑时及时参考[官方的文档](https://reactrouter.com/)。
 
 :::
 
 首先我们需要安装它。官方文档需要我们额外安装几个其他的组件，我不确认它们是否必要，在我本地的测试里不安装这些组件也能正常工作。
+
+::: warning 停止进程再安装
+
+在安装依赖的时候，请记得先停止 pnpm dev 进程，因为它在运行时可能会设置一些文件锁，让安装工作遇到不必要的困难。
+
+而且，在安装完成后，也最好重启一下进程，来加载新的包间依赖关系。
+
+:::
 
 ```sh
 pnpm i react-router-dom
@@ -852,19 +870,291 @@ export default App
 
 :::
 
-而如果要将各个页面组件单独拆出来，或是将页面的配置单独拆出来的方案，我想经过上面的学习，您一定已经了解了吧？那这里我也就不多重复啦。
+而如果要将各个页面组件单独拆出来，或是将页面的配置单独拆出来的方案，我想经过上面的学习，您一定已经了解了吧？那这里我就直接放出代码吧。
 
-这些还只是 react-router-dom 的简单应用。在一个复杂项目中，通常并不是整个页面都需要更新，只有其中的一块主内容区域是和路径相关的，其他的都属于样式的部分，因而没有必要重复编写和渲染；在一些更为复杂的项目中，甚至会出现嵌套路由，即在主内容区域中又划分有共用的内容和各自路径独立的内容。这些需求，它都能实现，只是具体的配置方法各有不同。在这里由于篇幅限制暂时不展开讲解，如果您有兴趣的话，欢迎随时去官方文档里了解更多。
+::: code-group
+
+```tsx [main.tsx]
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import { RouterProvider } from 'react-router-dom';
+import { router } from "@/routes.tsx";
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>,
+)
+```
+
+```tsx [routes.tsx]
+import { createBrowserRouter } from "react-router-dom";
+import App from "@/App.tsx";
+import NewPage from "@/pages/new-page.tsx";
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "/new-page",
+    element: <NewPage />,
+  },
+]);
+```
+
+```tsx [pages/new-page.tsx]
+const NewPage = () => (
+  <div>这是一个船新的页面</div>
+);
+
+export default NewPage;
+```
+
+:::
+
+这些还只是 react-router-dom 的简单应用。在一个复杂项目中，通常并不是整个页面都需要更新：只有其中的一块主内容区域是和路径相关的，其他的都属于样式的部分，因而没有必要重复编写和渲染。在一些更为复杂的项目中，甚至会出现嵌套路由：即在主内容区域中又划分有共用的内容和各自路径独立的内容。这些需求，它都能实现，只是具体的配置方法各有不同。在这里由于篇幅限制暂时不展开讲解，而是会作为课后挑战的内容呈现（会给出示例代码），您可以尝试自己挑战一下阅读官方的文档尝试。
 
 ### 状态管理
 
-当一个项目庞大到需要存储非常多状态以控制各个模块的内容时，使用一套优秀的状态管理系统就成了一项必备的需求。
+React 自带一个 useState 钩子，可以在组件中管理相关的状态；对于一个不大的项目来说，可以将这个状态存储在上层，并将状态信息和状态的修改钩子通过组件传参的方式传递给下属的组件，进而串起整个项目。
+
+但当一个项目庞大到需要存储非常多的复杂状态以控制各个模块的内容时，仅依靠 useState 来管理的状态会变得太过混乱，且子组件的权限过大容易导致一些意外的情况发生；此时使用一套优秀的状态管理系统就成了一项必备的需求。
+
+React 有不少优秀的状态管理工具，我们以 [Redux] 为例，简单讲解一下应该如何在一个 React 项目中使用一个较为精细的状态管理系统。
+
+[Redux]: https://redux.js.org/
+
+Redux 默认状态下的配置工作比较复杂，不是很新手友好，所以官方提供了一个 React 绑定和 Toolkit 工具来帮助实现相关的设置。我们要使用的就是这两个工具。
+
+::: tip 可能过期的知识
+
+您知道我想说什么。
+
+- [React Redux 官方文档](https://react-redux.js.org/)
+- [Redux Toolkit 官方文档](https://redux-toolkit.js.org/)
+
+:::
+
+首先自然是安装。
+
+```sh
+pnpm i react-redux @reduxjs/toolkit
+```
+
+安装完成后，我们需要使用 redux toolkit 来创建一个项目级的存储状态的配置。我们创建一个 `store.ts` 文件，里面是这样的：
+
+```ts
+import { configureStore } from "@reduxjs/toolkit";
+
+export const store = configureStore({
+  reducer: {
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+值得注意的是，最后的这两行是 TypeScript 独有的类型定义导出，用于在其他场合使用这些状态。如果您使用的是 JavaScript ，那么请去掉这两行。
+
+::: details 什么是 reducer
+
+当搜索这个问题的时候，我看到了各种各样的解释，但其中不少都会提到一句据传是来源于 Redux 官方文档的表达：
+
+> It's called a reducer because it's the type of function you would pass to `Array.prototype.reduce(reducer, ?initialValue)`.
+
+但或许是因为官方文档经历多次更新，使用了其他的表达，我并没有在官方文档里找到这一句描述。但至少它给了我们一些可能的思路：要想了解什么是 reducer ，我们先要从 JavaScript 的 `Array.prototype.reduce` 函数讲起。这个函数“[会将先前元素的计算结果作为参数传入，最后将其结果汇总为单个返回值。](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)”
+
+reducer 在 Redux 里的作用很简单，它接收两个参数：当前状态和有效载荷（payload），输出一个将载荷应用到当前状态后的新状态。也因此，可以把它理解为一个 Array.prototype.reduce 里对 reducer 函数的引申义。它的功能也非常像传入进去的这个函数，即输入上一次状态与有效载荷，并输出一个新的状态。
+
+很难找到一个合适的名称去准确地翻译这个表达，所以直接叫它 reducer 函数就好。
+
+参考资料：
+- [Redux 中的 reducer 到底是什么，以及它为什么叫 reducer？](https://www.freecodecamp.org/chinese/news/what-exactly-is-reducer-in-redux/)
+- [Array.prototype.reduce() - JavaScript | MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+
+:::
+
+在存储配置创建完成后，我们需要在 `main.tsx` 中引入它，就像这样：
+
+```tsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { store } from '@/store.ts';             /* [!code ++] */
+import { Provider } from 'react-redux';         /* [!code ++] */
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "/new-page",
+    element: <div>这是一个船新的页面</div>
+  }
+]);
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider store={store}>                   /* [!code ++] */
+      <RouterProvider router={router} />
+    </Provider>                                /* [!code ++] */
+  </React.StrictMode>,
+)
+```
+
+之后，我们就可以尽情管理状态了。例如，我们把主页上按钮的 counter 状态拆出来，做成一个全局状态：
+
+::: code-group
+
+```tsx [slices/counterSlice.ts]
+import { createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
+
+export interface CounterState {
+  value: number
+}
+
+const initialState: CounterState = {
+  value: 0,
+}
+
+export const counterSlice = createSlice({
+  name: 'counter',
+  initialState,
+  reducers: {
+    increment: (state, action: PayloadAction<number>) => {
+      state.value += action.payload
+    },
+  },
+})
+
+export const { increment } = counterSlice.actions
+
+export default counterSlice.reducer
+```
+
+```tsx [store.ts]
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "@/slices/counterSlice.ts"; /* [!code ++] */
+
+export const store = configureStore({
+  reducer: {
+    counter: counterReducer,                           /* [!code ++] */
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+```tsx [App.tsx]
+import { useState } from 'react'                          /* [!code --] */
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import Guess1 from "@/components/Guess1.tsx";
+import { NavLink } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";   /* [!code ++] */
+import type { AppDispatch, RootState } from "@/store.ts"; /* [!code ++] */
+import { increment } from "@/slices/counterSlice.ts";     /* [!code ++] */
+
+function App() {
+  const [count, setCount] = useState(0)                                 /* [!code --] */
+  const count = useSelector((state: RootState) => state.counter.value); /* [!code ++] */
+  const dispatch = useDispatch<AppDispatch>();                          /* [!code ++] */
+
+  return (
+    <>
+      <div>
+        <a href="https://vitejs.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 2)}> /* [!code --] */
+        <button onClick={() => dispatch(increment(2))}>         /* [!code ++] */
+          count is {count}
+        </button>
+        <p>
+          好耶！<code>热更新</code>生效了
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+      <Guess1 alertMessage={"坏耶"}>
+        <h2>怪耶</h2>
+      </Guess1>
+      <NavLink to={"/new-page"}>前往异世界的大门</NavLink>
+    </>
+  );
+}
+
+export default App;
+```
+
+:::
+
+那么，我们如何确定这个状态是被全局更新了呢？很简单，我们在 NewPage 组件里面也放置一个 count 状态，当改变首页的状态之后点进去看看是否变化了就可以。就像这样：
+
+```tsx
+import type { RootState } from "@/store.ts";              /* [!code ++] */
+import { useSelector } from "react-redux";                /* [!code ++] */
+
+const NewPage = () => {
+  const count = useSelector((state: RootState) => state.counter.value);  /* [!code ++] */
+
+  return (
+    <div>
+      这是一个船新的页面
+      ，计数器现在是 {count}                                /* [!code ++] */
+    </div>
+  )
+};
+
+export default NewPage;
+```
+
+![变化了的全局状态](./attachments/count-change-on-new-page.png)
+
+::: tip reducer 里的异步函数
+
+我们暂时还没讲异步函数相关的内容，目前所有的内容都是同步处理的。我们会在之后前后端联调的时候再来讲异步函数与同步函数之间的关系和差异。
+
+但如果您之前接触过 JavaScript ，那您一定不会对它的异步处理感到陌生。您可能会想能否往 reducer 里放置一些异步函数，例如 HTTP 请求之类的内容。
+
+那么首先写在这里：是不能直接放的。如果要放进去的话，需要使用 [createAsyncThunk] 函数来创建一个 thunk （我也不知道这玩意应该怎么翻译），再通过 `extraReducers` 来将它引入 redux 中。
+
+而在调用的时候，它的 dispatch 也会变成异步的，也就因此实现了对它的封装，可以用来加入一些请求结束（或失败）时的处理。
+
+[createAsyncThunk]: https://redux-toolkit.js.org/api/createAsyncThunk
+
+:::
 
 ## 优化
 
-组件拆分
+在项目变大的同时，浏览器的加载和渲染压力也会随之增加。为了避免太大的项目在性能不佳的设备上的体验太过糟糕，我们需要适时适度地进行优化。这里介绍两个我自己比较常用的优化方案：组件拆分和虚拟滚动。
 
-虚拟滚动
+组件拆分，顾名思义，就是将大组件拆成小组件的组合。这个优化主要是用来避免在小组件内部的状态更新时对整个大组件的重新渲染，导致页面闪烁或是卡顿的情况出现。我们可以根据“功能部件”或是“复用单位”为依据，将组件分别拆开。
+
+但具体应该怎么拆，拆到什么程度是合适的，这个没有一个绝对的标准。包括我自己的习惯，也是在不断的进一步认知发展中不断变化的。您可以尝试寻找到最适合自己的那一套方案。
+
+虚拟滚动的意思则是，对于一些非常多重复单元的组件（例如一个几万条聊天记录的聊天框），如果渲染出每一个元素，那么在渲染时就会造成非常严重的卡顿，并且在滚动操作中获得极为糟糕的体验。虚拟滚动的思想就是计算出当前滚动位置下应该加载出哪些元素（组件），而是使用高度占位符来替代那些看不到的东西。这样对于浏览器来说，实际渲染的部分就只有看到的那些组件，也就等同于仅仅渲染那几条或是几十条记录，从而有效地提升使用体验了。
+
+优化的方法还有非常多，并且往往和开发工作是相辅相成的。在开发工作时要有优化的意识，但也需要警惕，千万不要过早优化——在发现瓶颈之前就预设一个瓶颈，很容易导致简单的代码写得太过复杂，弄不好反而会对准确性和体验造成负面的影响。
+
+> Premature optimization is the root of all evil.
 
 ## 今日总结
 
@@ -882,10 +1172,24 @@ export default App
 
 [My initializer or updater function runs twice]: https://react.dev/reference/react/useState#my-initializer-or-updater-function-runs-twice
 
-猜猜2 的答案我想您也完全没问题——是有必要使用这个组件的。它虽然渲染得到的只是一个 a 标签，但它与传统意义上用于唤起浏览器路径变换行为的 a 标签不同，它会调用 React Router 的操作，从而在不重新加载页面的情况下实现路径变换与页面组件的更新。
+猜猜2 的答案我想您也完全没问题——是有必要使用这个组件的。它虽然渲染得到的只是一个 a 标签，但它与传统意义上用于唤起浏览器的地址变换行为的 a 标签不同，它会调用 React Router 的操作，从而在不重新加载页面的情况下实现路径变换与页面组件的更新。
 
 另外，这个组件还有一些特殊的功用，例如可以根据是否为当前页面改变自身的状态，从而辅助实现类似导航栏高亮显示活动页面的效果。
 
 虽然对于我们目前的项目来说可能区别并不是非常大，但我还是建议使用这些内置的组件，以方便在未来项目进一步扩展到出现局部路由区域时的页面状态维护与开发工作的进行。
 
 ## 课后挑战
+
+今天的课后挑战内容会比昨天的加上不少难度。因为我们学习了和 React 相关的很多内容，并简单讲解了一些进阶项目的技术工具。
+
+我们需要使用 React 和组件库，设计一个至少包含这些功能的记事本：登录、管理记事（CRUD，增删改查）。
+
+使用的组件库自选，不使用路由管理和状态管理也没问题。登录部分的逻辑可以使用账号密码，也可以使用 TOTP 。具体的逻辑先不用实现，把界面平铺开就行。如果组件库支持响应式的话，做成响应式的会更好。
+
+预祝您开发愉快。
+
+::: details 参考代码
+
+因为最近比较忙，我会在开始 Day4 的更新之前完成这部分代码的整理供您参考。但还是建议您在阅读样例之前，先自己去开一些项目来试一试，看看我写的这些文档哪里有疏漏，哪里不够清楚，可以随时在评论区指出，我们一起进步。
+
+:::
