@@ -18,6 +18,7 @@ export const zh = defineConfig({
           { text: 'Day 1 - 初探编程', link: '/what-is-programming/' },
           { text: 'Day 2 - 前端的魅力', link: '/frontend-intro/' },
           { text: 'Day 3 - 我的第一个前端项目', link: '/hello-browser/' },
+          { text: 'Day 4 - 神奇后端在哪里', link: '/hello-server/' },
         ]
       }
     ],
@@ -38,7 +39,7 @@ export const zh = defineConfig({
     },
 
     outline: {
-      level: 'deep',
+      level: [1,3],
       label: '页面导航'
     },
 

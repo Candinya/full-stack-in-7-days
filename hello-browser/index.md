@@ -1,4 +1,4 @@
-# 我的第一个前端项目：Hello browser
+# 我的第一个前端项目
 
 欢迎回来。
 
@@ -131,7 +131,7 @@ pnpm create vite
 
 您会得到形如这样的输出：
 
-```sh
+```
 ../../../.pnpm-store/v3/tmp/dlx-44456    |   +1 +
 ../../../.pnpm-store/v3/tmp/dlx-44456    | Progress: resolved 1, reused 1, downloaded 0, added 1, done
 
