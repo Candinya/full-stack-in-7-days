@@ -550,41 +550,48 @@ log.Printf("配置文件： %v", cfg)
 
 #### 创建一个 HTTP 服务器
 
-Go 有内置的 http 包，可以用于实现一个简单的 HTTP 服务器，但它使用起来有些许的繁琐，并且缺少一些内置的功能。我喜欢使用 `github.com/gin-gonic/gin` 或是 `github.com/labstack/echo/v4` 这两个框架。我们以 echo 为例。
+Go 有内置的 http 包，可以用于实现一个简单的 HTTP 服务器，但它使用起来有些许的繁琐，并且缺少一些内置的功能。我喜欢使用 [gin] 或是 [echo] 这两个框架。我们以 echo 为例。
+
+[gin]: https://gin-gonic.com/
+[echo]: https://echo.labstack.com/
 
 ```sh
 go get -u github.com/labstack/echo/v4
 ```
 
-复制官方仓库 ReadMe 里的代码：
+复制官方仓库 ReadMe 里的示例代码并稍加修改：
 
-::: code-group
+```go
+package main
 
-```go [添加到 main 函数的部分]
-// 创建一个 echo 实例
-e := echo.New()
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"net/http"
+)
 
-// 准备中间件
-e.Use(middleware.Logger())
-e.Use(middleware.Recover())
+func main() {
+	// 创建一个 echo 实例
+	e := echo.New()
 
-// 准备路由
-e.GET("/", hello)
+	// 准备中间件
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-// 开始监听服务器
-e.Logger.Fatal(e.Start(":1323"))
-```
+	// 准备路由
+	e.GET("/", hello)
 
-```go [添加到 main.go 文件的自定义函数]
+	// 开始监听服务器
+	e.Logger.Fatal(e.Start(":1323"))
+}
+
 // 处理函数
 func hello(c echo.Context) error {
 	return c.String(http.StatusOK, "好耶！")
 }
 ```
 
-:::
-
-运行程序，我们会发现它在启动之后并没有自动停止：这是正确的，因为我们希望它作为一个 HTTP 服务器，能开始接收来自外部的请求。
+运行程序。我们会发现它在启动之后并没有自动停止：这是正确的，因为我们希望它作为一个 HTTP 服务器，能开始接收来自外部的请求。
 
 我们使用浏览器打开 http://localhost:1323 ，可以看到页面上打印出了 `好耶！` ，并且我们的程序控制台也输出了一行请求日志。这样就实现了一个非常简单的 http 服务端。
 
@@ -598,7 +605,9 @@ func hello(c echo.Context) error {
 
 #### 使用 ORM 连接数据库
 
-我们经常使用数据库来管理数据，包括但不仅限于关系型数据或是非关系型数据。这里以关系型数据库 Postgres 为例，简单讲一讲用 GORM 连接过去并完成一些基本 CRUD 操作的流程。
+我们经常使用数据库来管理数据，包括但不仅限于关系型数据或是非关系型数据。这里以关系型数据库 Postgres 为例，简单讲一讲用 [GORM] 连接过去并完成一些基本 CRUD 操作的流程。
+
+[GORM]: https://gorm.io/
 
 ::: warning 启动 Postgres
 
@@ -606,7 +615,30 @@ func hello(c echo.Context) error {
 
 我推荐使用 Docker 启动一个 Postgres 容器，但因为 Docker 的部分暂时还没讲到，所以这部分可以先只是有一个印象就好，不用太纠结于立刻实践。
 
-当然，如果知道怎么跑容器的，也完全可以先试一试玩起来。
+当然，如果您知道怎么运行一个容器，也完全可以先试一试玩起来。这是示例使用的 `docker-compose.yml` 文件（包含下面会用到的 redis 容器）：
+
+```yaml
+version: "3.8"
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "candinya"
+      POSTGRES_PASSWORD: "full-stack-in-7-days"
+      POSTGRES_DB: "day4"
+      POSTGRES_INITDB_ARGS: "--encoding='UTF8' --lc-collate='C' --lc-ctype='C'"
+    ports:
+      - 127.0.0.1:5432:5432
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:6379:6379
+```
 
 :::
 
@@ -614,17 +646,170 @@ func hello(c echo.Context) error {
 go get -u gorm.io/gorm gorm.io/driver/postgres
 ```
 
+首先是连接到数据库。官方文档里的连接 DSN 使用的是列出各项参数的格式编写的，但出于方便配置与使用的考虑，我们也可以使用 URL 格式书写，就像这样：
 
+```go
+package main
+
+import (
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"log"
+)
+
+func main() {
+	// 初始化数据库连接
+	db, err := gorm.Open(postgres.Open("postgres://candinya:full-stack-in-7-days@localhost:5432/day4"), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("数据库连接失败: %v", err)
+	}
+
+	log.Printf("成功连接数据库: %s", db.Name())
+}
+```
+
+假设我们需要创建一个 Toy 表用来管理所有的玩具信息。我们需要先定义一个能够被 GORM 使用的结构，就像这样：
+
+```go
+type Toy struct {
+	gorm.Model
+	Name     string
+	Nickname string
+}
+```
+
+其中， `gorm.Model` 是一个 GORM 中预先定义可以作为数据库模型的类型，它长这样：
+
+```go
+type Model struct {
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt DeletedAt `gorm:"index"`
+}
+```
+
+在 Go 里面，没有传统意义上的类型继承，这里使用的是一种嵌入的方式来实现类似类型继承的效果，即将被嵌入结构体的字段对应放置到外部结构体中。但它在赋值的时候又会有些许的区别——在这里我们不会太多涉及这部分内容，但如果您有兴趣的话可以随时自己试一试。
+
+也就是说，我们的 Toy 类型现在等效于是这样的结构：
+
+```go
+type Toy struct {
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Name     string
+	Nickname string
+}
+```
+
+这样，我们的模型就声明完成，可以准备迁移数据库和使用它了。
+
+GORM 提供了一个方便的自动迁移功能，可以省去手写 SQL 的工夫；但对于一些变动比较复杂、尤其是在未来阶段可能会改动字段的类型结构来说，它并不能非常精确地调整相关的类型。对于小型项目来说，我会推荐使用它来加快开发流程，省下不必要的折腾麻烦；对于中大型项目来说，就还是老老实实地在结构确定之后使用精准的 SQL 定义来初始化相关的表格吧。
+
+```go
+package main
+
+import (
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"log"
+)
+
+type Toy struct {
+	gorm.Model
+	Name     string
+	Nickname string
+}
+
+func main() {
+	// 初始化数据库连接
+	db, err := gorm.Open(postgres.Open("postgres://candinya:full-stack-in-7-days@localhost:5432/day4"), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("数据库连接失败: %v", err)
+	}
+
+	if err = db.AutoMigrate(&Toy{}); err != nil { // [!code ++]
+		log.Fatalf("数据库自动迁移失败: %v", err)    // [!code ++]
+	}                                             // [!code ++]
+
+}
+```
+
+运行程序，我们可以在数据库中看到这样的一张表：
+
+![Toy 表](./attachments/toy-table.png)
+
+我们可以先手动往里面加入一些数据，再从程序里来读取它们：
+
+![手动写入一些表格数据](./attachments/toy-table-with-toys.png)
+
+```go
+package main
+
+import (
+	"errors"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"log"
+)
+
+type Toy struct {
+	gorm.Model
+	Name     string
+	Nickname string
+}
+
+func main() {
+	// 初始化数据库连接
+	db, err := gorm.Open(postgres.Open("postgres://candinya:full-stack-in-7-days@localhost:5432/day4"), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("数据库连接失败: %v", err)
+	}
+
+	if err = db.AutoMigrate(&Toy{}); err != nil {
+		log.Fatalf("数据库自动迁移失败: %v", err)
+	}
+
+	var toys []Toy                                          // [!code ++]
+	if err = db.Find(&toys).Error; err != nil {             // [!code ++]
+		if errors.Is(err, gorm.ErrRecordNotFound) {         // [!code ++]
+			log.Printf("玩具箱里还没有玩具哦")                  // [!code ++]
+		} else {                                            // [!code ++]
+			log.Printf("读取玩具列表失败: %v", err)            // [!code ++]
+		}                                                   // [!code ++]
+	} else {                                                // [!code ++]
+		for _, toy := range toys {                          // [!code ++]
+			log.Printf("玩具 %d 号是 %s", toy.ID, toy.Name)   // [!code ++]
+		}                                                   // [!code ++]
+	}                                                       // [!code ++]
+
+}
+```
+
+我们就能得到类似这样的输出：
+
+```log
+2024/03/09 00:21:11 玩具 1 号是 毛绒娃娃
+2024/03/09 00:21:11 玩具 2 号是 飞机模型
+2024/03/09 00:21:11 玩具 3 号是 宝宝厨房
+2024/03/09 00:21:11 玩具 4 号是 小小铁路
+```
+
+GORM 还有很多好玩的用法，这里限于篇幅就不多展开，留给您自己去阅读文档体验体验啦。
 
 #### 连接到 Redis
 
-Redis 是一个高效的 K-V 数据库（非关系型），一般我会用它来存储一些临时性的东西，比如会话的认证标识、一些读取缓存之类的数据，通过绕开这些非关键数据对数据库的频繁读写来尽可能优化性能。
+Redis 是一个高效的 K-V 数据库（非关系型），一般我会用它来存储一些临时性的东西，比如会话的认证标识、一些读取缓存之类的数据，通过绕开这些非关键数据对数据库的频繁读写来尽可能优化性能。我们可以使用 [go-redis] 来连接到它。
+
+[go-redis]: https://redis.uptrace.dev/
 
 ::: warning 启动 Redis
 
 因为 Redis 也是一个外部组件，我们也要先启动它才能让我们的程序连接过去。
 
-我也推荐用 Docker 。
+我也推荐用 Docker ，具体的容器配置可以参考上面的提示。
 
 :::
 
@@ -632,13 +817,124 @@ Redis 是一个高效的 K-V 数据库（非关系型），一般我会用它来
 go get -u github.com/redis/go-redis/v9
 ```
 
+Redis 的连接和读写就更加简单了。例如，我们需要设置一个值，再在之后读取它，就可以这样写：
+
+```go
+package main
+
+import (
+	"context"
+	"github.com/redis/go-redis/v9"
+	"log"
+	"time"
+)
+
+func main() {
+	// 转换 Redis 连接字符串
+	redisConfig, err := redis.ParseURL("redis://localhost:6379/0")
+	if err != nil {
+		log.Fatalf("Redis 连接字符串转换失败: %v", err)
+	}
+
+	// 连接到 Redis
+	rdb := redis.NewClient(redisConfig)
+
+	// 检查连接
+	if err = rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatalf("Redis 连接失败: %v", err)
+	}
+
+	// 设置一个值
+	if err = rdb.Set(context.Background(), "key", "这是值", 1*time.Minute).Err(); err != nil {
+		log.Fatalf("值设置失败: %v", err)
+	}
+
+	// 读取它
+	value, err := rdb.Get(context.Background(), "key").Result()
+	if err != nil {
+		log.Fatalf("值读取失败: %v", err)
+	}
+
+	// 打印出来
+	log.Printf("值是: %s", value)
+
+}
+```
+
+我们会得到：
+
+```log
+2024/03/09 00:33:43 值是: 这是值
+```
+
+
+::: details context 是什么
+
+您可能发现了这里我们用到了好几个 `context.Background()` 函数。这个是什么呢？
+
+我们先讲 context 。它是一个 Go 里面非常有趣的流程控制工具。从字面意义上来理解，它是「上下文」；从应用角度来讲，它是用来取消一个长请求的东西。
+
+在一般的程序逻辑里，一段代码的执行从开始之后就必须等待运行结束才能返回，或是被系统发出的进程信号控制结束；但对于 Go 来说，引入了一个 context的概念可以让它在任何时候被结束——请求时间太长了？设置一个带超时的 context 限制就可以； HTTP 会话中断了？那那个耗时的查询可以先不去执行了；连接断开了？那准备取消所有的长任务重启程序吧等等等等。
+
+灵活地使用 context ，可以让我们的程序在结果不再必要的时候，省去不必要的麻烦。那么， `context.Background()` 的意思也就很明显了：假定这是一个后台执行的任务，也就是在手动停掉之前（而我们的程序里没有手动停止它的逻辑），能让任务不限时地让它执行下去。
+
+:::
+
 #### 优化日志
 
-虽然 Go 自带的 log 已经足够处理一般日志和错误日志了，但为了更加精细的日志分级，我会喜欢使用 zap 这个日志工具。
+虽然 Go 自带的 log 已经足够处理一般日志和错误日志了，但为了更加精细的日志分级管理，我会喜欢使用 [zap] 这个日志工具。
+
+[zap]: https://github.com/uber-go/zap
 
 ```sh
 go get -u go.uber.org/zap
 ```
+
+zap 的用法同样非常简单，您一定一看就会：
+
+```go
+package main
+
+import (
+	"go.uber.org/zap"
+	"log"
+)
+
+func main() {
+	rawLogger, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal("zap 日志初始化失败")
+	}
+	defer rawLogger.Sync()
+
+	logger := rawLogger.Sugar()
+
+	logger.Debug("这是一条调试级别的日志")
+	logger.Info("这是一条消息级别的日志")
+	logger.Warn("这是一条警告级别的日志")
+	logger.Error("这是一条错误级别的日志")
+
+}
+```
+
+我们会得到形如这样的输出：
+
+```log
+2024-03-09T00:51:40.722+0800    DEBUG   day4/main.go:17 这是一条调试级别的日志
+2024-03-09T00:51:40.730+0800    INFO    day4/main.go:18 这是一条消息级别的日志
+2024-03-09T00:51:40.730+0800    WARN    day4/main.go:19 这是一条警告级别的日志
+main.main
+        D:/Projects/full-stack-in-7-days-repos/day4/main.go:19
+runtime.main
+        C:/Program Files/Go/src/runtime/proc.go:267
+2024-03-09T00:51:40.730+0800    ERROR   day4/main.go:20 这是一条错误级别的日志
+main.main
+        D:/Projects/full-stack-in-7-days-repos/day4/main.go:20
+runtime.main
+        C:/Program Files/Go/src/runtime/proc.go:267
+```
+
+可以看到，针对 warn 和 error 日志， zap 会贴心地给出堆栈追踪，方便进行具体的日志定位和错误修复。 zap 还可以配置日志级别，也就是说如果是运行在生产环境下的话，可以直接忽略掉 debug 和 info 的日志，只打印重要的部分——再也不怕日志太长塞满硬盘啦。
 
 ### 拆分目录
 
@@ -652,6 +948,20 @@ go get -u go.uber.org/zap
 
 ## 今日总结
 
-今天讲的主要是一些零零碎碎的 Go 知识，限于篇幅原因没法讲得非常详细，如果有什么不明白的欢迎随时留言 :pray:
+今天讲的主要是一些零零碎碎的 Go 知识和一些常用包的用法，限于篇幅原因没法讲得非常详细，如果有什么不明白的欢迎随时留言 :pray:
+
+猜猜1 的结果，相信您已经猜到了——改成小写的话， system 字段会因为无法得到 yaml 格式化后的值，而使用初始化时的默认值。对于 bool 类型的数据来说，就是 false 。
+
+猜猜2 就更简单了——浏览器在不指定网页 icon 的情况下，会默认尝试拉取 favicon.ico 作为网页图标。但值得注意的是，这个行为只有在您第一次打开页面时会出现，之后除非完整刷新，要不然它就不会再尝试了。
 
 ## 课后挑战
+
+Day3 的课后挑战实在写得我自己都有点晕，所以今天我们来点简单的：开一个 HTTP 服务器（用 go 自带的或者 echo 或者 gin 都可以，找自己最喜欢的就好），接收开始和结束两个数值，返回这两个数值之间所有的质数（直接打印在控制台也可以，能作为返回结果就更好了）
+
+::: details 参考代码
+
+```go
+
+```
+
+:::
