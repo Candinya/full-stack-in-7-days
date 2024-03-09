@@ -11,6 +11,11 @@ export const shared = defineConfig({
 
   base: '/full-stack-in-7-days/',
 
+  ignoreDeadLinks: [
+    // ignore all localhost links
+    /^https?:\/\/localhost/,
+  ],
+
   themeConfig: {
 
     socialLinks: [
