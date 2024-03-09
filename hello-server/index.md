@@ -605,13 +605,13 @@ func hello(c echo.Context) error {
 
 #### 使用 ORM 连接数据库
 
-我们经常使用数据库来管理数据，包括但不仅限于关系型数据或是非关系型数据。这里以关系型数据库 Postgres 为例，简单讲一讲用 [GORM] 连接过去并完成一些基本 CRUD 操作的流程。
+我们经常使用数据库来管理数据，包括但不仅限于关系型数据或是非关系型数据。这里以关系型数据库 Postgres 为例，简单讲一讲用 [GORM] 连接并完成一些基本 CRUD 操作的流程。
 
 [GORM]: https://gorm.io/
 
 ::: warning 启动 Postgres
 
-因为 Postgres 是一个外部组件，我们要先启动它才能让我们的程序连接过去。
+因为 Postgres 是一个外部组件，我们要先启动它才能让我们的程序连接。
 
 我推荐使用 Docker 启动一个 Postgres 容器，但因为 Docker 的部分暂时还没讲到，所以这部分可以先只是有一个印象就好，不用太纠结于立刻实践。
 
@@ -790,7 +790,7 @@ func main() {
 
 我们就能得到类似这样的输出：
 
-```log
+```:no-line-numbers
 2024/03/09 00:21:11 玩具 1 号是 毛绒娃娃
 2024/03/09 00:21:11 玩具 2 号是 飞机模型
 2024/03/09 00:21:11 玩具 3 号是 宝宝厨房
@@ -807,7 +807,7 @@ Redis 是一个高效的 K-V 数据库（非关系型），一般我会用它来
 
 ::: warning 启动 Redis
 
-因为 Redis 也是一个外部组件，我们也要先启动它才能让我们的程序连接过去。
+因为 Redis 也是一个外部组件，我们也要先启动它才能让我们的程序连接。
 
 我也推荐用 Docker ，具体的容器配置可以参考上面的提示。
 
@@ -863,7 +863,7 @@ func main() {
 
 我们会得到：
 
-```log
+```:no-line-numbers
 2024/03/09 00:33:43 值是: 这是值
 ```
 
@@ -919,7 +919,7 @@ func main() {
 
 我们会得到形如这样的输出：
 
-```log
+```:no-line-numbers
 2024-03-09T00:51:40.722+0800    DEBUG   day4/main.go:17 这是一条调试级别的日志
 2024-03-09T00:51:40.730+0800    INFO    day4/main.go:18 这是一条消息级别的日志
 2024-03-09T00:51:40.730+0800    WARN    day4/main.go:19 这是一条警告级别的日志
@@ -956,12 +956,84 @@ runtime.main
 
 ## 课后挑战
 
-Day3 的课后挑战实在写得我自己都有点晕，所以今天我们来点简单的：开一个 HTTP 服务器（用 go 自带的或者 echo 或者 gin 都可以，找自己最喜欢的就好），接收开始和结束两个数值，返回这两个数值之间所有的质数（直接打印在控制台也可以，能作为返回结果就更好了）
+Day3 的课后挑战实在写得我自己都有点晕，所以今天我们来点简单的：开一个 HTTP 服务器（用 go 自带的或者 echo 或者 gin 都可以，找自己最喜欢的就好），接收开始和结束两个正整数值，返回这两个数值之间所有的质数（直接打印在控制台也可以，能作为返回结果就更好了）
 
 ::: details 参考代码
 
-```go
+请求样例： http://localhost:1323/?start=1&end=100
 
+```go
+package main
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"go.uber.org/zap"
+	"math"
+	"net/http"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	// 创建一个 echo 实例
+	e := echo.New()
+
+	// 准备中间件
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	// 准备路由
+	e.GET("/", handleGetPrime)
+
+	// 开始监听服务器
+	e.Logger.Fatal(e.Start(":1323"))
+}
+
+type getPrimeReq struct {
+	Start *int `query:"start"`
+	End   *int `query:"end"`
+}
+
+func handleGetPrime(c echo.Context) error {
+	var req getPrimeReq
+	if err := c.Bind(&req); err != nil {
+		zap.L().Error("请求绑定失败", zap.Error(err))
+		return c.String(http.StatusInternalServerError, "请求绑定失败")
+	}
+	if req.Start == nil || req.End == nil {
+		return c.String(http.StatusBadRequest, "缺少 start 或 end")
+	}
+
+	if *req.Start > *req.End {
+		req.Start, req.End = req.End, req.Start
+	}
+
+	var primeStrs []string
+	for i := *req.Start; i <= *req.End; i++ {
+		if isPrime(i) {
+			primeStrs = append(primeStrs, strconv.Itoa(i))
+		}
+	}
+
+	return c.String(http.StatusOK, strings.Join(primeStrs, "\n"))
+}
+
+// 判断是否为素数
+func isPrime(num int) bool {
+	if num <= 1 {
+		// 不考虑负数
+		return false
+	}
+
+	for i := 2; i <= int(math.Sqrt(float64(num))); i++ {
+		if num%i == 0 {
+			return false
+		}
+	}
+
+	return true
+}
 ```
 
 :::
