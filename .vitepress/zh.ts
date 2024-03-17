@@ -40,7 +40,7 @@ export const zh = defineConfig({
     },
 
     outline: {
-      level: [1,3],
+      level: [2,3],
       label: '页面导航'
     },
 
