@@ -19,6 +19,7 @@ export const zh = defineConfig({
           { text: 'Day 2 - 前端的魅力', link: '/frontend-intro/' },
           { text: 'Day 3 - 我的第一个前端项目', link: '/hello-browser/' },
           { text: 'Day 4 - 神奇后端在哪里', link: '/hello-server/' },
+          { text: 'Day 5 - 连接起前后端的红绳', link: '/http-deep-dive/' },
         ]
       }
     ],
