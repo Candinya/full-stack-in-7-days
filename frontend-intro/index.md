@@ -745,7 +745,7 @@ null === undefined
 
 1. 双斜杠开头的这些叫做单行注释，指从双斜杠开始一直到行末的内容都会被浏览器忽略，不会被执行；另外注释还可以使用不交叉的块状注释，即在 `/*` 和 `*/` 包围范围内的所有内容都会被忽略；
 2. 可以使用 `document.getElementById` 这个函数，通过元素的 id 定位到指定的元素；
-3. alert 函数被触发的时候，用户在关闭弹出的提示框之前按钮的状态都没有恢复，这说明这个 alert 框会阻塞 JS 的执行进程，在它这个调用返回之前 JS 都无法执行到下一步。
+3. alert 函数被触发的时候，用户在关闭弹出的提示框之前按钮的状态都没有恢复，这说明这个 alert 框会阻塞 JS 的执行线程，在它这个调用返回之前 JS 都无法执行到下一步。
 
 JS 里还有非常非常多其他有趣的操作，可以慢慢研究。
 
@@ -777,9 +777,9 @@ JS 里还有非常非常多其他有趣的操作，可以慢慢研究。
 
 #### 模块化代码与延迟加载
 
-加载执行 JS 代码的过程会阻塞浏览器的渲染进程，如果页面上需要执行的代码非常多的话，可能会导致页面的渲染卡顿。并不是所有的 JS 代码都在网页初始化的时候就全部都会被执行到，所以可以将非必需立刻执行的代码拆到单独的组件中去，并使用 script 标签的 [async](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/script#async) 及 [defer](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/script#defer) 属性来处理。
+加载执行 JS 代码的过程会阻塞浏览器的渲染线程，如果页面上需要执行的代码非常多的话，可能会导致页面的渲染卡顿。并不是所有的 JS 代码都在网页初始化的时候就全部都会被执行到，所以可以将非必需立刻执行的代码拆到单独的组件中去，并使用 script 标签的 [async](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/script#async) 及 [defer](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/script#defer) 属性来处理。
 
-JS 执行和页面渲染是在主线程里同步执行的，这也意味着如果执行进程被卡住了，那么渲染进程也会跟着卡住。要尽可能减轻这个问题导致的性能影响，除了使用不容易阻塞的算法外，有一种常用的方法是先让页面向后渲染一段再执行耗时操作。例如可以使用 setTimeout 将它们包一层，并设置延时为一个较小的数值；或是使用 [requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback) 。
+同时，这也意味着如果 JS 的执行线程被卡住了，那么渲染线程也会跟着卡住。要尽可能减轻这个问题导致的性能影响，除了使用不容易阻塞的算法外，有一种常用的方法是先让页面向后渲染一段再执行耗时操作。例如可以使用 setTimeout 将它们包一层，并设置延时为一个较小的数值；或是使用 [requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback) 。
 
 #### 局部更新
 
