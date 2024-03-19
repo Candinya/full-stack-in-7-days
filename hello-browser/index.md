@@ -667,7 +667,7 @@ import 和花括号 {} 的意思我们刚刚已经理解了，那这个 type 又
 
 [Type-only imports and exports]: https://www.typescriptlang.org/docs/handbook/modules/reference.html#type-only-imports-and-exports
 
-因此，不难猜到下面那个 `interface Guess1Props extends PropsWithChildren` 的意思，就是一个名为 Guess1Props 的 interface 扩展了 PropsWithChildren 这个类型，并在此基础上新增了一些字段。这里是一个字符串（string）类型的 alertMessage 成员。
+因此，不难猜到下面那个 `interface Guess1Props extends PropsWithChildren` 的意思，就是一个名为 Guess1Props 的 interface 扩展了 PropsWithChildren 这个类型，并在此基础上新增了一些字段。这里是一个字符串 (string) 类型的 alertMessage 成员。
 
 ::: details TypeScript 的 interface 与 type
 
@@ -987,7 +987,7 @@ export type AppDispatch = typeof store.dispatch;
 
 但或许是因为官方文档经历多次更新，使用了其他的表达，我并没有在官方文档里找到这一句描述。但至少它给了我们一些可能的思路：要想了解什么是 reducer ，我们先要从 JavaScript 的 `Array.prototype.reduce` 函数讲起。这个函数“[会将先前元素的计算结果作为参数传入，最后将其结果汇总为单个返回值。](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)”
 
-reducer 在 Redux 里的作用很简单，它接收两个参数：当前状态和有效载荷（payload），输出一个将载荷应用到当前状态后的新状态。也因此，可以把它理解为一个 Array.prototype.reduce 里对 reducer 函数的引申义。它的功能也非常像传入进去的这个函数，即输入上一次状态与有效载荷，并输出一个新的状态。
+reducer 在 Redux 里的作用很简单，它接收两个参数：当前状态和有效载荷 (payload) ，输出一个将载荷应用到当前状态后的新状态。也因此，可以把它理解为一个 Array.prototype.reduce 里对 reducer 函数的引申义。它的功能也非常像传入进去的这个函数，即输入上一次状态与有效载荷，并输出一个新的状态。
 
 很难找到一个合适的名称去准确地翻译这个表达，所以直接叫它 reducer 函数就好。
 
