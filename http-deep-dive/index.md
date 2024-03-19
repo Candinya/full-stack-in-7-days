@@ -292,7 +292,206 @@ HSTS 一般仅限于生产环境使用，因为它会让浏览器在访问网站
 
 ## 浏览器能做的事
 
-XMLHttpRequest， axios 与 fetch API
+在前端开发的流程中，利用 JavaScript 的帮助，我们可以更加灵活地使用浏览器发出 HTTP(S) 请求，而无需太过关注其背后的实现细节。
+
+### 创建一个 HTTP 请求
+
+在古老的时代，我们使用 XHR  (XMLHttpRequest)  来完成基于 JavaScript 的请求。它的优势是兼容性非常强大，基本上是个浏览器就支持它，因而在一些需要特殊奇怪老产品兼容性支持的场合，依然可以使用。
+
+而到了今天，主流的浏览器已经能使用 [fetch API] 这个非常现代化的请求工具。它提供了一个比 XHR 更方便使用的封装，并使用了 Promise 封装异步函数机制来优化相关的处理流程。具体的使用可以参考 [使用 Fetch] 这个页面上提供的资料，我们这里趁机稍微来展开讲一讲异步函数是什么东西。
+
+[fetch API]: https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API
+[使用 Fetch]: https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch
+
+### 异步函数与同步函数
+
+::: danger 未知的领域
+
+这块的内容我也不是很熟悉，如果有任何错误还请您能帮忙斧正，非常感谢 :pray:
+
+:::
+
+在 Day 1 中我们说过，程序的执行是从上至下的；在 Day 2 中我们也提到过， JS 只有一条主线程，所有的事情都在它上面执行，耗时的操作会阻塞住交互让页面变得卡顿。异步函数的理念正是为了解决这一问题而出现。要想理解它，我们就要稍微关注一下 JS 底层的执行机制了。
+
+JavaScript 的核心执行模式是 **事件循环（Event Loop）**，即在一个大的无限循环中不断地等待队列中出现事件，再依次去执行它们。
+
+::: tip 队列
+
+队列 (queue) 是一种先进先出（FIFO, First In First Out）的数据结构：可以理解为一个两端开口的管道，在管道的一端按照顺序塞入直径等于管道内径的光滑理想球体，它们在管道的另一端一定会遵循塞入的顺序依次退出。
+
+如果是后进先出（LIFO, Last In First Out）的数据模型，那是栈 (stack) ：可以理解为一个单端开口的管道，球体只能从这个口进入与退出。
+
+:::
+
+异步函数与同步函数不同的一个地方在于，同步函数可以确定在执行完成后返回，但异步函数不能知道确切的返回时间。所以与同步函数的返回值设计不同的是，异步函数会使用一种叫做 **回调 (callback)** 的设计，在异步函数中传入一个后续的处理函数，在异步函数执行完成后由它来调用这个回调函数，从而实现后续的处理流程。
+
+一个异步函数的大致执行流程如下：
+
+- 在一个异步任务初始化时，它的回调函数会被放入任务队列的末端，等待异步函数的执行结果返回；
+- 当它之前的任务队列都执行完成，运行环境在检查它时发现还未满足它的回调条件，它会被再塞回队列末尾等待下一轮检测；
+- 以此循环直至执行完成后，当执行线程再一次检查到这个任务时，触发它放在任务队列中的回调函数。
+
+因此，我们得到了一种用于解决部分耗时太长的操作的新思路：使用异步函数来封装它。
+
+在使用 Promise 的异步封装出现之前， JS 的异步函数需要基于 events 来编写，在每一层异步函数调用中将下一层处理函数作为回调函数参数传入。这样编写有一个结构型的问题，即当需要大量连续的异步函数处理时，层层嵌套的回调函数会非常影响代码的可读性。 Promise 可以理解为一种异步函数的封装语法糖，它本身并不创造新的概念，而是一种作为异步函数封装的辅助工具来解决回调地狱的可读性糟糕的问题。它可以将层层包裹的异步调用展平成类似链式的结构，就像这样：
+
+::: code-group
+
+```js [回调地狱写法]
+setTimeout(() => {
+    console.log("1");
+    setTimeout(() => {
+        console.log("2");
+        setTimeout(() => {
+            console.log("3");
+            setTimeout(() => {
+                console.log("4");
+                setTimeout(() => {
+                    console.log("5");
+                    setTimeout(() => {
+                        console.log("6");
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }, 1000);
+    }, 1000);
+}, 1000);
+
+console.log("fin");
+```
+
+```js [Promise 封装写法]
+const mySetTimeout = (time) => new Promise((resolve) => {
+    setTimeout(resolve, time);
+});
+
+mySetTimeout(1000).then(() => {
+    console.log("1");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("2");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("3");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("4");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("5");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("6");
+})
+
+console.log("fin");
+```
+:::
+
+::: tip 猜猜1
+
+猜猜 `fin` 会在什么时候出现，数字出现之前还是之后？
+
+:::
+
+使用这种写法还有一个好处，就是可以在外面整体处理错误。比如这样：
+
+```js {26-28}
+const mySetTimeout = (time) => new Promise((resolve, reject) => {
+    if (time !== 1000) {
+        setTimeout(() => reject(new Error("时间差不多咯")), time);
+    } else {
+        setTimeout(resolve, time);
+    }
+});
+
+mySetTimeout(1000).then(() => {
+    console.log("1");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("2");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("3");
+    return mySetTimeout(500);
+}).then(() => {
+    console.log("4");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("5");
+    return mySetTimeout(1000);
+}).then(() => {
+    console.log("6");
+}).catch((err) => {
+    console.log(err.message);
+})
+
+console.log("fin");
+```
+
+ES6 引入了新的 `async` 和 `await` 语法糖，则能更进一步地优化 Promise 的使用。配合 try catch 捕获错误，我们的程序可以变成这样：
+
+```js {9-24}
+const mySetTimeout = (time) => new Promise((resolve, reject) => {
+    if (time !== 1000) {
+        setTimeout(() => reject(new Error("时间差不多咯")), time);
+    } else {
+        setTimeout(resolve, time);
+    }
+});
+
+try {
+    await mySetTimeout(1000);
+    console.log("1");
+    await mySetTimeout(1000);
+    console.log("2");
+    await mySetTimeout(1000);
+    console.log("3");
+    await mySetTimeout(500);
+    console.log("4");
+    await mySetTimeout(1000);
+    console.log("5");
+    await mySetTimeout(1000);
+    console.log("6");
+} catch (err) {
+    console.log(err.message);
+}
+
+console.log("fin");
+```
+
+可以看到已经基本和同步函数的写法差不多了——事实上如果您在浏览器执行它的话，会发现它确实会阻塞进程（ Node.js 环境里不能将 await 放置在顶层）。为了避免这个问题，我们可以这样稍微调整一下代码：
+
+```js {9,26}
+const mySetTimeout = (time) => new Promise((resolve, reject) => {
+    if (time !== 1000) {
+        setTimeout(() => reject(new Error("时间差不多咯")), time);
+    } else {
+        setTimeout(resolve, time);
+    }
+});
+
+(async () => {
+    try {
+        await mySetTimeout(1000);
+        console.log("1");
+        await mySetTimeout(1000);
+        console.log("2");
+        await mySetTimeout(1000);
+        console.log("3");
+        await mySetTimeout(500);
+        console.log("4");
+        await mySetTimeout(1000);
+        console.log("5");
+        await mySetTimeout(1000);
+        console.log("6");
+    } catch (err) {
+        console.log(err.message);
+    }
+})();
+
+console.log("fin");
+```
 
 ## 跨域资源共享 (CORS) 的处理
 
@@ -309,5 +508,9 @@ XMLHttpRequest， axios 与 fetch API
 ### GraphQL
 
 ## 今日总结
+
+今天主要讲了 HTTP 的一些底层知识，和 JS 的异步函数的一些思考方式与实用技巧。
+
+猜猜1 的答案是：除了那个 await 在顶层的代码是 `fin` 在最后出来的之外，其他的都是在全部输入完成之后就出现的。理由也很简单——虽然这些函数看上去像是同步函数直接写在主线程里面，但实际上它们是异步函数，当 JS 处理异步函数的时候自动将它们扔出了主线程；而输出的这一行是结结实实的同步函数，既然写在主线程里面那么就在主线程里面被执行了。
 
 ## 课后挑战
