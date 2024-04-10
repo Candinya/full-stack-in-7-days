@@ -237,7 +237,7 @@ type Toy struct {
 
 ### 顺序，选择，循环
 
-在 Day1 中我们浅浅地提了一句三大结构，但并没有详细展开来讲；但对于后端逻辑来说，它们却是必不可少的部分。所以在这里，我们来仔细讲一讲这三个部分。
+在 Day 1 中我们浅浅地提了一句三大结构，但并没有详细展开来讲；但对于后端逻辑来说，它们却是必不可少的部分。所以在这里，我们来仔细讲一讲这三个部分。
 
 #### 顺序
 
@@ -599,7 +599,7 @@ func hello(c echo.Context) error {
 
 只访问了一次页面，为什么控制台里输出了两行请求日志呢？
 
-提示：和浏览器的默认行为有关， Day2 我们遇到过的。
+提示：和浏览器的默认行为有关， Day 2 我们遇到过的。
 
 :::
 
@@ -956,84 +956,12 @@ runtime.main
 
 ## 课后挑战
 
-Day3 的课后挑战实在写得我自己都有点晕，所以今天我们来点简单的：开一个 HTTP 服务器（用 go 自带的或者 echo 或者 gin 都可以，找自己最喜欢的就好），接收开始和结束两个正整数值，返回这两个数值之间所有的质数（直接打印在控制台也可以，能作为返回结果就更好了）
+Day 3 的课后挑战实在写得我自己都有点晕，所以今天我们来点简单的：开一个 HTTP 服务器（用 go 自带的或者 echo 或者 gin 都可以，找自己最喜欢的就好），接收开始和结束两个正整数值，返回这两个数值之间所有的质数（直接打印在控制台也可以，能作为返回结果就更好了）
 
 ::: details 参考代码
 
+请参见 https://github.com/Candinya/full-stack-in-7-days_day4-challenge
+
 请求样例： http://localhost:1323/?start=1&end=100
-
-```go
-package main
-
-import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"go.uber.org/zap"
-	"math"
-	"net/http"
-	"strconv"
-	"strings"
-)
-
-func main() {
-	// 创建一个 echo 实例
-	e := echo.New()
-
-	// 准备中间件
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-
-	// 准备路由
-	e.GET("/", handleGetPrime)
-
-	// 开始监听服务器
-	e.Logger.Fatal(e.Start(":1323"))
-}
-
-type getPrimeReq struct {
-	Start *int `query:"start"`
-	End   *int `query:"end"`
-}
-
-func handleGetPrime(c echo.Context) error {
-	var req getPrimeReq
-	if err := c.Bind(&req); err != nil {
-		zap.L().Error("请求绑定失败", zap.Error(err))
-		return c.String(http.StatusInternalServerError, "请求绑定失败")
-	}
-	if req.Start == nil || req.End == nil {
-		return c.String(http.StatusBadRequest, "缺少 start 或 end")
-	}
-
-	if *req.Start > *req.End {
-		req.Start, req.End = req.End, req.Start
-	}
-
-	var primeStrs []string
-	for i := *req.Start; i <= *req.End; i++ {
-		if isPrime(i) {
-			primeStrs = append(primeStrs, strconv.Itoa(i))
-		}
-	}
-
-	return c.String(http.StatusOK, strings.Join(primeStrs, "\n"))
-}
-
-// 判断是否为素数
-func isPrime(num int) bool {
-	if num <= 1 {
-		// 不考虑负数
-		return false
-	}
-
-	for i := 2; i <= int(math.Sqrt(float64(num))); i++ {
-		if num%i == 0 {
-			return false
-		}
-	}
-
-	return true
-}
-```
 
 :::

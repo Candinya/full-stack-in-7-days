@@ -8,9 +8,9 @@
     "preview": "vitepress preview"
   },
   "dependencies": {
-    "sass": "^1.71.0",
+    "sass": "^1.74.1",
     "viewerjs": "^1.11.6",
-    "vitepress": "1.0.0-rc.43",
+    "vitepress": "1.0.2",
     "vitepress-plugin-comment-with-giscus": "^1.1.12",
     "vitepress-plugin-image-viewer": "^1.1.3"
   },

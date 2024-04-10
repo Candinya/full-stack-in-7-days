@@ -20,6 +20,7 @@ export const zh = defineConfig({
           { text: 'Day 3 - 我的第一个前端项目', link: '/hello-browser/' },
           { text: 'Day 4 - 神奇后端在哪里', link: '/hello-server/' },
           { text: 'Day 5 - 连接起前后端的红绳', link: '/http-deep-dive/' },
+          { text: 'Day 6 - 一切皆可容器化', link: '/containerize-everything/' },
         ]
       }
     ],

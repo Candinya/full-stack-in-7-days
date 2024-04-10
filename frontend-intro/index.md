@@ -865,7 +865,7 @@ HTML 可以在 head 里指定一些关键资源的链接来进行预加载，这
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Day2 课后挑战</title>
+    <title>Day 2 课后挑战</title>
     <style>
         main {
             margin-top: 4rem; /* 顶边距 */
