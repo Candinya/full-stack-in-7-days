@@ -21,6 +21,8 @@ export const zh = defineConfig({
           { text: 'Day 4 - 神奇后端在哪里', link: '/hello-server/' },
           { text: 'Day 5 - 连接起前后端的红绳', link: '/http-deep-dive/' },
           { text: 'Day 6 - 一切皆可容器化', link: '/containerize-everything/' },
+          { text: 'Day 7 - 欢迎来到我的空间', link: '/hello-world/' },
+          { text: '后记', link: '/postscript/' },
         ]
       }
     ],

@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  canvas-confetti:
+    specifier: ^1.9.2
+    version: 1.9.2
   sass:
     specifier: ^1.74.1
     version: 1.74.1
@@ -866,6 +869,10 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       fill-range: 7.0.1
+    dev: false
+
+  /canvas-confetti@1.9.2:
+    resolution: {integrity: sha512-6Xi7aHHzKwxZsem4mCKoqP6YwUG3HamaHHAlz1hTNQPCqXhARFpSXnkC9TWlahHY5CG6hSL5XexNjxK8irVErg==}
     dev: false
 
   /cheerio-select@1.6.0:

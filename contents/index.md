@@ -10,6 +10,6 @@
 - Day 4 - 神奇后端在哪里 [->](/hello-server/)
 - Day 5 - 连接起前后端的红绳 [->](/http-deep-dive/)
 - Day 6 - 一切皆可容器化 [->](/containerize-everything/)
-- Day 7 - 噔噔！欢迎来到我的空间
+- Day 7 - 噔噔！欢迎来到我的空间 [->](/hello-world/)
 
-:memo: 后记
+:memo: 后记 [->](/postscript/)
